@@ -558,7 +558,45 @@ function resumeLogging() {
         logInterval = setInterval(logSensorData, 0.01); // Adjust the interval as needed
     }
 }
+// Connect to the WebSocket server
+const ws = new WebSocket('ws://your-domain-or-ip:8080'); // Replace with your WebSocket server URL
 
+ws.onopen = () => {
+  console.log('Connected to WebSocket server');
+};
+
+ws.onerror = (error) => {
+  console.error('WebSocket error:', error);
+};
+
+ws.onclose = () => {
+  console.log('WebSocket connection closed');
+};
+
+// Function to send data
+function sendData(sensorName, data) {
+  if (ws.readyState === WebSocket.OPEN) {
+    const payload = {
+      sensor: sensorName,
+      data,
+      timestamp: new Date().toISOString(),
+    };
+    ws.send(JSON.stringify(payload));
+  }
+}
+
+// Send gyroscope and quaternion data
+function streamData() {
+  // Replace this with your actual sensor data
+  const gyroscopeData = { x: 1.2, y: 3.4, z: -0.6 };
+  const quaternionData = { x: 0.5, y: 0.5, z: 0.5, w: 0.5 };
+
+  sendData('gyroscope', gyroscopeData);
+  sendData('quaternion', quaternionData);
+}
+
+// Stream data at intervals
+setInterval(streamData, 1000); // Stream every second
 function logSensorData() {
     const timestamp = new Date().toISOString();
     const temperature = NiclaSenseME.temperature.data.temperature.length > 0 ? NiclaSenseME.temperature.data.temperature[NiclaSenseME.temperature.data.temperature.length - 1] : null;
